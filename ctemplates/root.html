@@ -190,11 +190,48 @@
           color: #9ca3af;
         }
       }
+
+      .commit-btn-col {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: start;
+        margin-top: 0.75rem;
+      }
+
+      .commit-btn-col button {
+        width: 100%;
+      }
+
+      .commit-small {
+        display: block;
+        font-size: 0.8rem;
+        color: white; /* neutral */
+        margin-top: 0.25rem;
+      }
+      @media (prefers-color-scheme: dark) {
+        .commit-small {
+          color: #9ca3af;
+        }
+      }
+      .busy {
+        color: red !important;
+        opacity: 0.7;
+        pointer-events: none;
+      }
+      .step-output {
+        height: 100px;
+        overflow-y: auto;
+        margin-top: 0.75rem;
+        font-family: monospace;
+        white-space: pre-wrap;
+        background: #0; /* kept by existing pre rules */
+      }
     </style>
   </head>
   <body>
     <header>
-      <h1>Git Commands</h1>
+      <h1>Git Web</h1>
     </header>
 
     {{ if .BackLink }}
@@ -217,31 +254,34 @@
         </section>
 
         <section>
-          <form class="commit-push-form">
+          <div class="controls-header">
             <h2>Commit &amp; Push</h2>
-            <div class="form-holder">
-              <div>
-                <input id="stage" type="checkbox" checked />
-                <label for="stage">Stage changes</label>
-              </div>
-              <div>
-                <input id="commit" type="checkbox" checked />
-                <label for="commit">Commit</label>
-              </div>
-              <div>
-                <input id="push" type="checkbox" checked />
-                <label for="push">Push</label>
-              </div>
-              <div>
-                <input id="pr" type="checkbox" checked />
-                <label for="pr"
-                  >Create Pull Request (requires
-                  <span class="mono">gh</span>)</label
-                >
-              </div>
-            </div>
-            <button type="submit">Commit & Push</button>
-          </form>
+          </div>
+
+          <!-- Buttons -->
+          <div class="commit-btn-col">
+            <button id="btn-commit">
+              <p>Commit</p>
+              <span class="commit-small">Works without remote</span>
+            </button>
+
+            <button id="btn-commit-push">
+              <p>Commit + Push</p>
+              <span class="commit-small">Requires ssh key setup to push</span>
+            </button>
+
+            <button id="btn-commit-pr">
+              <p>Commit + Create PR</p>
+              <span class="commit-small">Requires `gh` installed</span>
+            </button>
+
+            <small>Commits always stages all changes automatically.</small>
+          </div>
+
+          <!-- area to show step outputs -->
+          <pre id="commit-action-output" class="step-output">
+ Result will appear here</pre
+          >
         </section>
 
         <section>
@@ -373,6 +413,124 @@
           .replace(/</g, "&lt;")
           .replace(/>/g, "&gt;");
       }
+
+      const btnCommit = document.getElementById("btn-commit");
+      const btnCommitPush = document.getElementById("btn-commit-push");
+      const btnCommitPR = document.getElementById("btn-commit-pr");
+      const outputBox = document.getElementById("commit-action-output");
+      const branchSelect = document.getElementById("branch-select");
+
+      // helper: run an action on server
+      async function runGitAction(payload) {
+        // ensure UI shows busy
+        setBusy(true);
+        outputBox.textContent = "Running...\n";
+        try {
+          const resp = await fetch("/git-action", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          const data = await resp.json();
+
+          if (!resp.ok) {
+            outputBox.textContent =
+              data && data.error ? data.error : "HTTP " + resp.status;
+            return data;
+          }
+
+          // pretty show step outputs
+          if (Array.isArray(data.steps)) {
+            outputBox.textContent = data.steps
+              .map(
+                (s) =>
+                  `> ${s.cmd}\n${s.output || ""}${s.err ? "\nERR: " + s.err : ""}\n`,
+              )
+              .join("\n");
+          } else {
+            outputBox.textContent = data.output || data.error || "(no output)";
+          }
+
+          // on success refresh diff and (optionally) other UI
+          if (data.success) {
+            try {
+              loadDiff();
+            } catch (e) {
+              /* ignore */
+            }
+          }
+          return data;
+        } catch (err) {
+          outputBox.textContent = "Network error: " + err.message;
+          return { success: false, error: err.message };
+        } finally {
+          setBusy(false);
+        }
+      }
+
+      function setBusy(flag) {
+        [btnCommit, btnCommitPush, btnCommitPR].forEach((b) => {
+          if (flag) b.classList.add("busy");
+          else b.classList.remove("busy");
+          b.disabled = flag;
+        });
+      }
+
+      // Button handlers:
+      btnCommit.addEventListener("click", async () => {
+        const commitMsg = prompt("Commit message:");
+        if (!commitMsg) {
+          alert("Aborted: commit message required.");
+          return;
+        }
+        const branch = branchSelect?.value || null;
+        await runGitAction({
+          action: "commit",
+          branch,
+          message: commitMsg,
+        });
+      });
+
+      btnCommitPush.addEventListener("click", async () => {
+        const commitMsg = prompt("Commit message:");
+        if (!commitMsg) {
+          alert("Aborted: commit message required.");
+          return;
+        }
+        const branch = branchSelect?.value || null;
+        await runGitAction({
+          action: "commit-push",
+          branch,
+          message: commitMsg,
+        });
+      });
+
+      btnCommitPR.addEventListener("click", async () => {
+        const commitMsg = prompt("Commit message:");
+        if (!commitMsg) {
+          alert("Aborted: commit message required.");
+          return;
+        }
+
+        // Prompt for PR title/body (default to commit message)
+        const prTitle = prompt("PR title:", commitMsg) || commitMsg;
+        const prBody = prompt("PR body (optional):", "") || "";
+
+        // Optionally choose base (default 'main')
+        const prBase =
+          prompt("PR base branch (default: main):", "main") || "main";
+
+        const branch = branchSelect?.value || null;
+        await runGitAction({
+          action: "commit-pr",
+          branch,
+          message: commitMsg,
+          pr_base: prBase,
+          pr_title: prTitle,
+          pr_body: prBody,
+        });
+      });
+
       loadDiff();
     </script>
   </body>
