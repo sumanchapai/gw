@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/sumanchapai/gw/ctemplates"
 	"github.com/sumanchapai/gw/env"
 	"github.com/sumanchapai/gw/git"
 	"github.com/sumanchapai/gw/utils"
+
+	"html/template"
 )
 
 func Root(w http.ResponseWriter, r *http.Request) {
@@ -28,5 +31,11 @@ func Root(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "Hello, world!")
+	// Parse template
+	path, err := ctemplates.Path("root.html")
+	if err != nil {
+		fmt.Fprintf(w, "error getting template path %s", err)
+	}
+	tmpl := template.Must(template.ParseFiles(path))
+	tmpl.Execute(w, nil)
 }
