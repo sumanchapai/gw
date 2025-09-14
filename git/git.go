@@ -2,6 +2,7 @@ package git
 
 import (
 	"fmt"
+	"log"
 	"os/exec"
 	"slices"
 	"strings"
@@ -16,7 +17,7 @@ type CommandResult struct {
 	err    error
 }
 
-// returns error if the provided path is not a git repo, nil otherwise
+// IsGitRepo returns error if the provided path is not a git repo, nil otherwise
 func IsGitRepo(name string) error {
 	if err := utils.FolderExists(name); err != nil {
 		return err
@@ -33,7 +34,7 @@ func IsGitRepo(name string) error {
 	return nil
 }
 
-// Run arbitrary git command in the provided repo
+// run exectues arbitrary git command in the provided repo
 func run(repo string, args ...string) CommandResult {
 	if err := IsGitRepo(repo); err != nil {
 		return CommandResult{"", cerrors.ErrPathNotAGitRepo}
@@ -44,8 +45,8 @@ func run(repo string, args ...string) CommandResult {
 	return CommandResult{string(output), err}
 }
 
-// Run a git command that's not restricted.
-// Returns error if restricted command is run.
+// SafeRun exectues a git command that's not restricted.
+// returns error if restricted command is run.
 func SafeRun(repo string, args ...string) CommandResult {
 	if len(args) == 0 {
 		return CommandResult{"", cerrors.ErrEmptyGitCommand}
@@ -55,4 +56,48 @@ func SafeRun(repo string, args ...string) CommandResult {
 		return CommandResult{"", cerrors.ErrRestrictedCommand}
 	}
 	return run(repo, args...)
+}
+
+// Branches returns the list of Git branches
+func Branches(repo string) ([]string, error) {
+	if ok, _ := hasCommits(repo); !ok {
+		return []string{}, nil
+	}
+	x := SafeRun(repo, "branch", "--list", "--format=%(refname:short)")
+	if x.err != nil {
+		log.Println(x.result)
+		log.Println(x.err)
+		return nil, x.err
+	}
+	branches := strings.Split(strings.TrimSpace(x.result), "\n")
+	return branches, nil
+}
+
+// CurrentBranch returns the name of the current Git branch
+func CurrentBranch(repo string) (string, error) {
+	if ok, _ := hasCommits(repo); !ok {
+		return defaultBranch(repo)
+	}
+
+	x := SafeRun(repo, "rev-parse", "--abbrev-ref", "HEAD")
+	if x.err != nil {
+		log.Println(x.result)
+		log.Println(x.err)
+		return "", x.err
+	}
+
+	branch := strings.TrimSpace(string(x.result))
+	return branch, nil
+}
+
+// defaultBranch returns the default branch in the repo
+func defaultBranch(repo string) (string, error) {
+	defaultRun := SafeRun(repo, "symbolic-ref", "--short", "HEAD")
+	return strings.TrimSpace(defaultRun.result), defaultRun.err
+}
+
+// hasCommits returns true if the repo any has commits
+func hasCommits(repo string) (bool, error) {
+	x := SafeRun(repo, "rev-parse", "HEAD")
+	return x.err == nil, x.err
 }

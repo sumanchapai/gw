@@ -1,19 +1,76 @@
 <html>
+  <head>
+    <style>
+      body {
+        font-family: monospace;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+      }
+      .mono {
+        font-family: monospace;
+      }
+      .form-holder {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .commit-push-form {
+      }
+      .commit-push-form label {
+        padding: 0.5rem;
+        display: block;
+      }
+      .form-holder > div {
+        display: flex;
+      }
+      .commit-push-form button {
+        margin-top: 1rem;
+      }
+    </style>
+  </head>
   <body>
     <header>
       <h1>Git Commands</h1>
     </header>
     <nav>Back</nav>
     <section>
-      On branch
-      <select>
-        <option>branchname</option>
-        <option>todo: other branches</option>
+      Branch
+      <select name="branch">
+        <option value="{{.CurrentBranch}}">{{ .CurrentBranch }}</option>
+        {{range .OtherBranches }}
+        <option value="{{.}}">{{.}}</option>
+        {{end}}
       </select>
     </section>
     <section>
-      <h2>Commit &amp; Push</h2>
-      <div></div>
+      <form class="commit-push-form">
+        <h2>Commit &amp; Push</h2>
+        <div class="form-holder">
+          <div>
+            <input id="stage" type="checkbox" checked />
+            <label for="stage" value="true">Stage changes</label>
+          </div>
+
+          <div>
+            <input id="commit" type="checkbox" checked />
+            <label for="commit">Commit</label>
+          </div>
+
+          <div>
+            <input id="push" type="checkbox" checked />
+            <label for="push">Push</label>
+          </div>
+
+          <div>
+            <input id="pr" type="checkbox" checked />
+            <label for="pr"
+              >Create Pull Request (requires you have
+              <span class="monospace">gh</span> installed)</label
+            >
+          </div>
+        </div>
+        <button type="submit">Commit and Push</button>
+      </form>
     </section>
     <section>
       <h2>Commands</h2>

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/sumanchapai/gw/ctemplates"
@@ -21,12 +22,14 @@ func Root(w http.ResponseWriter, r *http.Request) {
 
 	// Check if the GW_REPO exists
 	if err := utils.FolderExists(repo); err != nil {
+		log.Println(err)
 		fmt.Fprintf(w, "%s", fmt.Sprintf("GW_REPO: %v. error: %v", repo, err))
 		return
 	}
 
 	// Check if the GW_REPO is a valid Git repo
 	if err := git.IsGitRepo(repo); err != nil {
+		log.Println(err)
 		fmt.Fprintf(w, "%s", fmt.Sprintf("GW_REPO: %v. error: %v", repo, err))
 		return
 	}
@@ -34,8 +37,16 @@ func Root(w http.ResponseWriter, r *http.Request) {
 	// Parse template
 	path, err := ctemplates.Path("root.html")
 	if err != nil {
+		log.Println(err)
 		fmt.Fprintf(w, "error getting template path %s", err)
 	}
 	tmpl := template.Must(template.ParseFiles(path))
-	tmpl.Execute(w, nil)
+
+	tmplData, err := ctemplates.GetRootData()
+	if err != nil {
+		log.Println(err)
+		fmt.Fprintf(w, "%s", fmt.Sprintf("Error getting template data. error: %v", err))
+		return
+	}
+	tmpl.Execute(w, tmplData)
 }
