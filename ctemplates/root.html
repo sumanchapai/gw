@@ -2,29 +2,193 @@
   <head>
     <style>
       body {
-        font-family: monospace;
+        font-family: system-ui, sans-serif;
         margin: 0 auto;
-        padding: 2rem 1rem;
+        padding: 2rem;
+        max-width: 1200px;
+        background: #f9fafb;
+        color: #111;
       }
-      .mono {
-        font-family: monospace;
+      header {
+        margin-bottom: 2rem;
+      }
+      h1 {
+        margin: 0;
+        font-size: 1.75rem;
+      }
+      nav {
+        margin-bottom: 1.5rem;
+      }
+      nav a {
+        color: #2563eb;
+        text-decoration: none;
+        font-weight: 500;
+      }
+      nav a:hover {
+        text-decoration: underline;
+      }
+      section {
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      }
+      section h2 {
+        margin-top: 0;
+        font-size: 1.25rem;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
       }
       .form-holder {
         display: flex;
         flex-direction: column;
-        gap: 8px;
-      }
-      .commit-push-form {
-      }
-      .commit-push-form label {
-        padding: 0.5rem;
-        display: block;
+        gap: 0.75rem;
       }
       .form-holder > div {
         display: flex;
+        align-items: center;
+        gap: 0.5rem;
       }
-      .commit-push-form button {
-        margin-top: 1rem;
+      label {
+        font-weight: 500;
+      }
+      input[type="text"] {
+        padding: 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        flex: 1;
+        background: #fff;
+        color: #111;
+      }
+      input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+      }
+      button {
+        display: inline-block;
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 0.6rem 1rem;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: background 0.2s ease;
+      }
+      button:hover {
+        background: #1d4ed8;
+      }
+      pre {
+        background: #f3f4f6;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 0.75rem;
+        font-family: monospace;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        margin: 0;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+
+      /* Layout */
+      .main-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+      @media (min-width: 900px) {
+        .main-container {
+          flex-direction: row;
+          align-items: flex-start;
+        }
+        .controls-panel {
+          flex: 1;
+          min-width: 300px;
+          max-width: 400px;
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+        }
+        .diff-panel {
+          flex: 2;
+          min-width: 400px;
+        }
+      }
+
+      /* --- Dark Mode --- */
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: #111827; /* dark gray */
+          color: #f3f4f6; /* light text */
+        }
+        section {
+          background: #1f2937; /* darker panel */
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+        }
+        section h2 {
+          border-bottom: 1px solid #374151;
+        }
+        nav a {
+          color: #60a5fa;
+        }
+        input[type="text"] {
+          background: #111827;
+          border: 1px solid #374151;
+          color: #f3f4f6;
+        }
+        pre {
+          background: #111827;
+          border: 1px solid #374151;
+          color: #e5e7eb;
+        }
+        button {
+          background: #3b82f6;
+        }
+        button:hover {
+          background: #2563eb;
+        }
+      }
+
+      /* Git diff syntax highlighting */
+      .diff-line {
+        display: block;
+        white-space: pre-wrap;
+        font-family: monospace;
+      }
+      .diff-add {
+        background: #e6ffed;
+        color: #22863a;
+      }
+      .diff-remove {
+        background: #ffeef0;
+        color: #b31d28;
+      }
+      .diff-hunk {
+        background: #f1f8ff;
+        color: #0366d6;
+        font-weight: bold;
+      }
+      .diff-meta {
+        color: #6a737d;
+      }
+      @media (prefers-color-scheme: dark) {
+        .diff-add {
+          background: #144620;
+          color: #85e89d;
+        }
+        .diff-remove {
+          background: #86181d;
+          color: #fdaeb7;
+        }
+        .diff-hunk {
+          background: #1b1f23;
+          color: #79b8ff;
+        }
+        .diff-meta {
+          color: #9ca3af;
+        }
       }
     </style>
   </head>
@@ -32,66 +196,184 @@
     <header>
       <h1>Git Commands</h1>
     </header>
+
     {{ if .BackLink }}
     <nav>
-      <a href="{{ .BackLink }}">Back</a>
+      <a href="{{ .BackLink }}">← Back</a>
     </nav>
     {{ end }}
-    <section>
-      Branch
-      <select name="branch">
-        <option value="{{.CurrentBranch}}">{{ .CurrentBranch }}</option>
-        {{range .OtherBranches }}
-        <option value="{{.}}">{{.}}</option>
-        {{end}}
-      </select>
-    </section>
-    <section>
-      <form class="commit-push-form">
-        <h2>Commit &amp; Push</h2>
-        <div class="form-holder">
-          <div>
-            <input id="stage" type="checkbox" checked />
-            <label for="stage" value="true">Stage changes</label>
-          </div>
 
-          <div>
-            <input id="commit" type="checkbox" checked />
-            <label for="commit">Commit</label>
-          </div>
+    <div class="main-container">
+      <!-- LEFT: controls -->
+      <div class="controls-panel">
+        <section>
+          <h2>Branch</h2>
+          <select id="branch-select" name="branch">
+            <option value="{{.CurrentBranch}}">{{ .CurrentBranch }}</option>
+            {{range .OtherBranches }}
+            <option value="{{.}}">{{.}}</option>
+            {{end}}
+          </select>
+        </section>
 
-          <div>
-            <input id="push" type="checkbox" checked />
-            <label for="push">Push</label>
-          </div>
+        <section>
+          <form class="commit-push-form">
+            <h2>Commit &amp; Push</h2>
+            <div class="form-holder">
+              <div>
+                <input id="stage" type="checkbox" checked />
+                <label for="stage">Stage changes</label>
+              </div>
+              <div>
+                <input id="commit" type="checkbox" checked />
+                <label for="commit">Commit</label>
+              </div>
+              <div>
+                <input id="push" type="checkbox" checked />
+                <label for="push">Push</label>
+              </div>
+              <div>
+                <input id="pr" type="checkbox" checked />
+                <label for="pr"
+                  >Create Pull Request (requires
+                  <span class="mono">gh</span>)</label
+                >
+              </div>
+            </div>
+            <button type="submit">Commit & Push</button>
+          </form>
+        </section>
 
-          <div>
-            <input id="pr" type="checkbox" checked />
-            <label for="pr"
-              >Create Pull Request (requires you have
-              <span class="monospace">gh</span> installed)</label
-            >
-          </div>
-        </div>
-        <button type="submit">Commit and Push</button>
-      </form>
-    </section>
-    <section>
-      <form class="git-command-form">
-        <h2>Commands</h2>
-        <div class="form-holder">
-          <label for="command">Command</label>
-          <input id="command" type="text" />
-          <pre
-            id="command-result"
-            style="border: 1px solid red; height: 200px; overflow-y: auto"
-          ></pre>
-        </div>
-      </form>
-    </section>
-    <section>
-      <h2>Diff</h2>
-      <div></div>
-    </section>
+        <section>
+          <form class="git-command-form">
+            <h2>Run Git Command</h2>
+            <div class="form-holder">
+              <div>
+                <label for="command">Command:</label>
+                <input id="command" type="text" placeholder="e.g. status" />
+                <button type="submit">Run</button>
+              </div>
+              <pre id="command-result">Result will appear here...</pre>
+            </div>
+          </form>
+        </section>
+      </div>
+
+      <!-- RIGHT: diff -->
+      <div class="diff-panel">
+        <section>
+          <h2>Diff</h2>
+          <pre id="diff-result">Loading git diff...</pre>
+        </section>
+      </div>
+    </div>
+
+    <script>
+      // Run arbitrary git command
+      document
+        .querySelector(".git-command-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const cmd = document.getElementById("command").value.trim();
+          if (!cmd) return;
+
+          const resultBox = document.getElementById("command-result");
+          resultBox.textContent = "Running...";
+          try {
+            const resp = await fetch("/git-command", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ args: cmd.split(" ") }),
+            });
+            const data = await resp.json();
+            resultBox.textContent = data.output || data.error || "(no output)";
+            // Refresh diff
+            loadDiff();
+          } catch (err) {
+            resultBox.textContent = "Error: " + err.message;
+            // Refresh diff
+            loadDiff();
+          }
+        });
+
+      // Switch branch on select change
+      document
+        .getElementById("branch-select")
+        .addEventListener("change", async (e) => {
+          const branch = e.target.value;
+          e.target.disabled = true;
+          try {
+            const resp = await fetch("/git-command", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ args: ["checkout", branch] }),
+            });
+            const data = await resp.json();
+
+            if (data.success) {
+              alert(`Switched to branch: ${branch}`);
+              loadDiff();
+            } else {
+              alert("Error switching branch:\n" + (data.error || data.output));
+              e.target.value = "{{.CurrentBranch}}";
+            }
+          } catch (err) {
+            alert("Request failed: " + err.message);
+            e.target.value = "{{.CurrentBranch}}";
+          } finally {
+            e.target.disabled = false;
+          }
+        });
+
+      // Load git diff on page load
+      async function loadDiff() {
+        const diffBox = document.getElementById("diff-result");
+        diffBox.textContent = "Loading...";
+        try {
+          const resp = await fetch("/git-command", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ args: ["diff"] }),
+          });
+          const data = await resp.json();
+          const raw = data.output || data.error || "(no diff)";
+          diffBox.innerHTML = highlightDiff(raw);
+        } catch (err) {
+          diffBox.textContent = "Error: " + err.message;
+        }
+      }
+
+      function highlightDiff(diffText) {
+        return diffText
+          .split("\n")
+          .map((line) => {
+            if (line.startsWith("+") && !line.startsWith("+++")) {
+              return `<span class="diff-line diff-add">${escapeHtml(line)}</span>`;
+            } else if (line.startsWith("-") && !line.startsWith("---")) {
+              return `<span class="diff-line diff-remove">${escapeHtml(line)}</span>`;
+            } else if (line.startsWith("@@")) {
+              return `<span class="diff-line diff-hunk">${escapeHtml(line)}</span>`;
+            } else if (
+              line.startsWith("diff ") ||
+              line.startsWith("index ") ||
+              line.startsWith("---") ||
+              line.startsWith("+++")
+            ) {
+              return `<span class="diff-line diff-meta">${escapeHtml(line)}</span>`;
+            } else {
+              return `<span class="diff-line">${escapeHtml(line)}</span>`;
+            }
+          })
+          .join("");
+      }
+
+      function escapeHtml(str) {
+        return str
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+      loadDiff();
+    </script>
   </body>
 </html>
