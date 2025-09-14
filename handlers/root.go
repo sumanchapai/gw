@@ -5,12 +5,28 @@ import (
 	"net/http"
 
 	"github.com/sumanchapai/gw/env"
+	"github.com/sumanchapai/gw/git"
+	"github.com/sumanchapai/gw/utils"
 )
 
 func Root(w http.ResponseWriter, r *http.Request) {
-	if v := env.GW_REPO(); v == "" {
+	repo := env.GW_REPO()
+	if repo == "" {
 		fmt.Fprintf(w, "GW_REPO environment variable is empty.")
 		return
 	}
+
+	// Check if the GW_REPO exists
+	if err := utils.FolderExists(repo); err != nil {
+		fmt.Fprintf(w, "%s", fmt.Sprintf("GW_REPO: %v. error: %v", repo, err))
+		return
+	}
+
+	// Check if the GW_REPO is a valid Git repo
+	if err := git.IsGitRepo(repo); err != nil {
+		fmt.Fprintf(w, "%s", fmt.Sprintf("GW_REPO: %v. error: %v", repo, err))
+		return
+	}
+
 	fmt.Fprintf(w, "Hello, world!")
 }
