@@ -31,5 +31,6 @@ func GetRootData() (*RootData, error) {
 	return &RootData{
 		CurrentBranch: currentBranch,
 		OtherBranches: otherBranches,
+		BackLink:      env.BACK_LINK(),
 	}, nil
 }

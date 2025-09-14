@@ -32,7 +32,11 @@
     <header>
       <h1>Git Commands</h1>
     </header>
-    <nav>Back</nav>
+    {{ if .BackLink }}
+    <nav>
+      <a href="{{ .BackLink }}">Back</a>
+    </nav>
+    {{ end }}
     <section>
       Branch
       <select name="branch">
@@ -73,8 +77,17 @@
       </form>
     </section>
     <section>
-      <h2>Commands</h2>
-      <div></div>
+      <form class="git-command-form">
+        <h2>Commands</h2>
+        <div class="form-holder">
+          <label for="command">Command</label>
+          <input id="command" type="text" />
+          <pre
+            id="command-result"
+            style="border: 1px solid red; height: 200px; overflow-y: auto"
+          ></pre>
+        </div>
+      </form>
     </section>
     <section>
       <h2>Diff</h2>

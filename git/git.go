@@ -13,8 +13,8 @@ import (
 )
 
 type CommandResult struct {
-	result string
-	err    error
+	Result string
+	Err    error
 }
 
 // IsGitRepo returns error if the provided path is not a git repo, nil otherwise
@@ -64,12 +64,12 @@ func Branches(repo string) ([]string, error) {
 		return []string{}, nil
 	}
 	x := SafeRun(repo, "branch", "--list", "--format=%(refname:short)")
-	if x.err != nil {
-		log.Println(x.result)
-		log.Println(x.err)
-		return nil, x.err
+	if x.Err != nil {
+		log.Println(x.Result)
+		log.Println(x.Err)
+		return nil, x.Err
 	}
-	branches := strings.Split(strings.TrimSpace(x.result), "\n")
+	branches := strings.Split(strings.TrimSpace(x.Result), "\n")
 	return branches, nil
 }
 
@@ -80,24 +80,24 @@ func CurrentBranch(repo string) (string, error) {
 	}
 
 	x := SafeRun(repo, "rev-parse", "--abbrev-ref", "HEAD")
-	if x.err != nil {
-		log.Println(x.result)
-		log.Println(x.err)
-		return "", x.err
+	if x.Err != nil {
+		log.Println(x.Result)
+		log.Println(x.Err)
+		return "", x.Err
 	}
 
-	branch := strings.TrimSpace(string(x.result))
+	branch := strings.TrimSpace(string(x.Result))
 	return branch, nil
 }
 
 // defaultBranch returns the default branch in the repo
 func defaultBranch(repo string) (string, error) {
 	defaultRun := SafeRun(repo, "symbolic-ref", "--short", "HEAD")
-	return strings.TrimSpace(defaultRun.result), defaultRun.err
+	return strings.TrimSpace(defaultRun.Result), defaultRun.Err
 }
 
 // hasCommits returns true if the repo any has commits
 func hasCommits(repo string) (bool, error) {
 	x := SafeRun(repo, "rev-parse", "HEAD")
-	return x.err == nil, x.err
+	return x.Err == nil, x.Err
 }
