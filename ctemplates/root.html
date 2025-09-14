@@ -95,8 +95,13 @@
       /* Layout */
       .main-container {
         display: flex;
-        flex-direction: column;
+        flex-direction: column-reverse;
         gap: 1.5rem;
+      }
+      .controls-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
       }
       @media (min-width: 900px) {
         .main-container {
@@ -109,7 +114,7 @@
           max-width: 400px;
           display: flex;
           flex-direction: column;
-          gap: 1.5rem;
+          gap: 2rem;
         }
         .diff-panel {
           flex: 2;
@@ -262,7 +267,7 @@
           <div class="commit-btn-col">
             <button id="btn-commit">
               <p>Commit</p>
-              <span class="commit-small">Works without remote</span>
+              <span class="commit-small">Stages all changes</span>
             </button>
 
             <button id="btn-commit-push">
@@ -367,8 +372,11 @@
 
       // Load git diff on page load
       async function loadDiff() {
+        const noDiff = "(no diff)";
         const diffBox = document.getElementById("diff-result");
-        diffBox.textContent = "Loading...";
+        if (diffBox.textContent === noDiff) {
+          diffBox.textContent = "Loading...";
+        }
         try {
           const resp = await fetch("/git-command", {
             method: "POST",
@@ -376,7 +384,7 @@
             body: JSON.stringify({ args: ["diff"] }),
           });
           const data = await resp.json();
-          const raw = data.output || data.error || "(no diff)";
+          const raw = data.output || data.error || noDiff;
           diffBox.innerHTML = highlightDiff(raw);
         } catch (err) {
           diffBox.textContent = "Error: " + err.message;
