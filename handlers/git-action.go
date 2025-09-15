@@ -57,6 +57,13 @@ func GitAction(w http.ResponseWriter, r *http.Request) {
 			conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
 			return
 		}
+	case "commit-push":
+		err := scripts.CommitAndPush(req.CommitMsg, &stdout, &stderr)
+		if err != nil {
+			log.Println("Error running CommitAndPush", "err:", err)
+			conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+			return
+		}
 	default:
 		log.Println("Invalid action received", req.Action)
 		conn.WriteMessage(websocket.TextMessage, []byte("Invalid action received"))

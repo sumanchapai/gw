@@ -146,11 +146,9 @@ btnCommitPush.addEventListener("click", async () => {
     alert("Aborted: commit message required.");
     return;
   }
-  const branch = branchSelect?.value || null;
   await runGitAction({
     action: "commit-push",
-    branch,
-    message: commitMsg,
+    commitmsg: commitMsg,
   });
 });
 

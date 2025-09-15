@@ -101,3 +101,18 @@ func hasCommits(repo string) (bool, error) {
 	x := SafeRun(repo, "rev-parse", "HEAD")
 	return x.Err == nil, x.Err
 }
+
+// remoteExists checks if a remote with the given name exists.
+func RemoteExists(repo string, name string) bool {
+	res := run(repo, "remote")
+	if res.Err != nil {
+		return false
+	}
+	remotes := strings.Split(strings.TrimSpace(res.Result), "\n")
+	for _, r := range remotes {
+		if r == name {
+			return true
+		}
+	}
+	return false
+}
