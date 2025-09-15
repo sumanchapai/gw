@@ -220,10 +220,10 @@
         }
       }
       .busy {
-        color: red !important;
         opacity: 0.7;
         pointer-events: none;
       }
+
       .step-output {
         height: 100px;
         overflow-y: auto;
@@ -231,6 +231,32 @@
         font-family: monospace;
         white-space: pre-wrap;
         background: #0; /* kept by existing pre rules */
+      }
+
+      .outer-wrapper {
+        position: relative; /* important for absolute positioning */
+      }
+
+      .output-spinner {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.75rem;
+        width: 16px;
+        height: 16px;
+        border: 2px solid #888;
+        border-top: 2px solid #2563eb;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        display: none; /* hidden by default */
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
       }
     </style>
   </head>
@@ -284,9 +310,12 @@
           </div>
 
           <!-- area to show step outputs -->
-          <pre id="commit-action-output" class="step-output">
- Result will appear here</pre
-          >
+          <div class="outer-wrapper">
+            <pre id="commit-action-output" class="step-output">
+Result will appear here </pre
+            >
+            <div id="commit-spinner" class="output-spinner"></div>
+          </div>
         </section>
 
         <section>
@@ -430,50 +459,36 @@
 
       // helper: run an action on server
       async function runGitAction(payload) {
-        // ensure UI shows busy
-        setBusy(true);
-        outputBox.textContent = "Running...\n";
-        try {
-          const resp = await fetch("/git-action", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          });
-          const data = await resp.json();
+        const spinner = document.getElementById("commit-spinner");
+        spinner.style.display = "block"; // show spinner
+        outputBox.textContent = ""; // clear old logs
 
-          if (!resp.ok) {
-            outputBox.textContent =
-              data && data.error ? data.error : "HTTP " + resp.status;
-            return data;
-          }
+        return new Promise((resolve, reject) => {
+          const ws = new WebSocket(`ws://${window.location.host}/git-action`);
 
-          // pretty show step outputs
-          if (Array.isArray(data.steps)) {
-            outputBox.textContent = data.steps
-              .map(
-                (s) =>
-                  `> ${s.cmd}\n${s.output || ""}${s.err ? "\nERR: " + s.err : ""}\n`,
-              )
-              .join("\n");
-          } else {
-            outputBox.textContent = data.output || data.error || "(no output)";
-          }
+          ws.onopen = () => {
+            ws.send(JSON.stringify(payload));
+          };
 
-          // on success refresh diff and (optionally) other UI
-          if (data.success) {
+          ws.onmessage = (event) => {
+            outputBox.textContent += event.data + "\n";
+            outputBox.scrollTop = outputBox.scrollHeight;
+          };
+
+          ws.onerror = (err) => {
+            outputBox.textContent += "\nError: " + err.message;
+            spinner.style.display = "none"; // hide spinner on error
+            reject(err);
+          };
+
+          ws.onclose = () => {
+            spinner.style.display = "none"; // hide spinner when finished
+            resolve({ success: true });
             try {
               loadDiff();
-            } catch (e) {
-              /* ignore */
-            }
-          }
-          return data;
-        } catch (err) {
-          outputBox.textContent = "Network error: " + err.message;
-          return { success: false, error: err.message };
-        } finally {
-          setBusy(false);
-        }
+            } catch (e) {}
+          };
+        });
       }
 
       function setBusy(flag) {
@@ -494,8 +509,7 @@
         const branch = branchSelect?.value || null;
         await runGitAction({
           action: "commit",
-          branch,
-          message: commitMsg,
+          args: [commitMsg],
         });
       });
 

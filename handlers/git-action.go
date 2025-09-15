@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"bufio"
-	"encoding/json"
 	"io"
 	"log"
 	"net/http"
@@ -15,10 +14,12 @@ import (
 
 type ActionRequest struct {
 	Action string   `json:"action"`
-	Args   []string `json:"commitmsg"`
+	Args   []string `json:"args"`
 }
 
-var upgrader = websocket.Upgrader{}
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool { return true }, // allow all
+}
 
 // GitAction handler streams the result of running the provided git-action
 func GitAction(w http.ResponseWriter, r *http.Request) {
@@ -32,8 +33,8 @@ func GitAction(w http.ResponseWriter, r *http.Request) {
 	defer conn.Close()
 	var req ActionRequest
 
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		conn.WriteMessage(websocket.TextMessage, []byte("Invalid JSON"))
+	if err := conn.ReadJSON(&req); err != nil {
+		conn.WriteMessage(websocket.TextMessage, []byte("Invalid JSON"+err.Error()))
 		return
 	}
 
@@ -45,7 +46,7 @@ func GitAction(w http.ResponseWriter, r *http.Request) {
 		script, err = scripts.Path("commit.sh")
 		if err != nil {
 			log.Println("Error loading script", script, "err:", err)
-			conn.WriteMessage(websocket.TextMessage, []byte("Error loading script"))
+			conn.WriteMessage(websocket.TextMessage, []byte("Error loading script"+err.Error()))
 			return
 		}
 	default:
@@ -61,20 +62,20 @@ func GitAction(w http.ResponseWriter, r *http.Request) {
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		log.Println("Error getting stdout", err)
-		conn.WriteMessage(websocket.TextMessage, []byte("Error getting stdout"))
+		conn.WriteMessage(websocket.TextMessage, []byte("Error getting stdout"+err.Error()))
 		return
 	}
 
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
 		log.Println("Error getting stderr", err)
-		conn.WriteMessage(websocket.TextMessage, []byte("Error getting stderr"))
+		conn.WriteMessage(websocket.TextMessage, []byte("Error getting stderr"+err.Error()))
 		return
 	}
 
 	if err := cmd.Start(); err != nil {
 		log.Println("Error starting command", err)
-		conn.WriteMessage(websocket.TextMessage, []byte("Error starting command"))
+		conn.WriteMessage(websocket.TextMessage, []byte("Error starting command"+err.Error()))
 	}
 
 	scanner := bufio.NewScanner(io.MultiReader(stdout, stderr))
@@ -82,6 +83,9 @@ func GitAction(w http.ResponseWriter, r *http.Request) {
 		line := scanner.Text()
 		conn.WriteMessage(websocket.TextMessage, []byte(line))
 	}
-	cmd.Wait()
-	conn.WriteMessage(websocket.TextMessage, []byte("DONE"))
+	if err := cmd.Wait(); err != nil {
+		log.Println("Command failed", err)
+		conn.WriteMessage(websocket.TextMessage, []byte("Command failed: "+err.Error()))
+		return
+	}
 }
