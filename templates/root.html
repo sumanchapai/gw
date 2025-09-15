@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+  <head>
+    <link rel="stylesheet" href="/static/css/style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Git Web</h1>
+    </header>
+    {{ if .BackLink }}
+    <nav>
+      <a href="{{ .BackLink }}">← Back</a>
+    </nav>
+    {{ end }}
+
+    <div class="main-container">
+      <!-- LEFT: controls -->
+      <div class="controls-panel">
+        <section>
+          <h2>Branch</h2>
+          <select id="branch-select" name="branch">
+            <option value="{{.CurrentBranch}}">{{ .CurrentBranch }}</option>
+            {{range .OtherBranches }}
+            <option value="{{.}}">{{.}}</option>
+            {{end}}
+          </select>
+        </section>
+
+        <section>
+          <div class="controls-header">
+            <h2>Commit &amp; Push</h2>
+          </div>
+
+          <!-- Buttons -->
+          <div class="commit-btn-col">
+            <button id="btn-commit">
+              <p>Commit</p>
+              <span class="commit-small">Stages all changes</span>
+            </button>
+
+            <button id="btn-commit-push">
+              <p>Commit + Push</p>
+              <span class="commit-small">Requires ssh key setup to push</span>
+            </button>
+
+            <button id="btn-commit-pr">
+              <p>Commit + Create PR</p>
+              <span class="commit-small">Requires `gh` installed</span>
+            </button>
+
+            <small>Commits always stages all changes automatically.</small>
+          </div>
+
+          <!-- area to show step outputs -->
+          <div class="outer-wrapper">
+            <pre id="commit-action-output" class="step-output">
+Result will appear here </pre
+            >
+            <div id="commit-spinner" class="output-spinner"></div>
+          </div>
+        </section>
+
+        <section>
+          <form class="git-command-form">
+            <h2>Run Git Command</h2>
+            <div class="form-holder">
+              <div>
+                <label for="command">Command:</label>
+                <input id="command" type="text" placeholder="e.g. status" />
+                <button type="submit">Run</button>
+              </div>
+              <pre id="command-result">Result will appear here...</pre>
+            </div>
+          </form>
+        </section>
+      </div>
+
+      <!-- RIGHT: diff -->
+      <div class="diff-panel">
+        <section>
+          <h2>Diff</h2>
+          <pre id="diff-result">Loading git diff...</pre>
+        </section>
+      </div>
+    </div>
+    <script src="/static/js/app.js"></script>
+  </body>
+</html>

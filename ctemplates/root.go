@@ -7,6 +7,12 @@ import (
 	"github.com/sumanchapai/gw/git"
 )
 
+type RootData struct {
+	CurrentBranch string
+	OtherBranches []string
+	BackLink      string
+}
+
 // GetRootData builds the datatype that the root template requires.
 func GetRootData() (*RootData, error) {
 	repo := env.GW_REPO()

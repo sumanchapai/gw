@@ -1,0 +1,271 @@
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0 auto;
+  padding: 2rem;
+  max-width: 1200px;
+  background: #f9fafb;
+  color: #111;
+}
+header {
+  margin-bottom: 2rem;
+}
+h1 {
+  margin: 0;
+  font-size: 1.75rem;
+}
+nav {
+  margin-bottom: 1.5rem;
+}
+nav a {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 500;
+}
+nav a:hover {
+  text-decoration: underline;
+}
+section {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+section h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+.form-holder {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.form-holder > div {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+label {
+  font-weight: 500;
+}
+input[type="text"] {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  flex: 1;
+  background: #fff;
+  color: #111;
+}
+input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}
+button {
+  display: inline-block;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+button:hover {
+  background: #1d4ed8;
+}
+pre {
+  background: #f3f4f6;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.75rem;
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.commit-btn-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: start;
+  margin-top: 0.75rem;
+}
+
+.commit-btn-col button {
+  width: 100%;
+}
+
+.commit-small {
+  display: block;
+  font-size: 0.8rem;
+  color: white; /* neutral */
+  margin-top: 0.25rem;
+}
+
+/* Layout */
+.main-container {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 1.5rem;
+}
+.controls-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Git diff syntax highlighting */
+.diff-line {
+  display: block;
+  white-space: pre-wrap;
+  font-family: monospace;
+}
+.diff-add {
+  background: #e6ffed;
+  color: #22863a;
+}
+.diff-remove {
+  background: #ffeef0;
+  color: #b31d28;
+}
+.diff-hunk {
+  background: #f1f8ff;
+  color: #0366d6;
+  font-weight: bold;
+}
+.diff-meta {
+  color: #6a737d;
+}
+
+.busy {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.step-output {
+  height: 100px;
+  overflow-y: auto;
+  margin-top: 0.75rem;
+  font-family: monospace;
+  white-space: pre-wrap;
+}
+
+.outer-wrapper {
+  position: relative; /* important for absolute positioning */
+}
+
+.output-spinner {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.75rem;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #888;
+  border-top: 2px solid #2563eb;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: none; /* hidden by default */
+}
+
+/* 
+*
+* LARGE SCREEN LAYOUT 
+*
+*/
+
+@media (min-width: 900px) {
+  .main-container {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .controls-panel {
+    flex: 1;
+    min-width: 300px;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  .diff-panel {
+    flex: 2;
+    min-width: 400px;
+  }
+}
+
+/* 
+* 
+* Dark Mode
+*
+* */
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #111827; /* dark gray */
+    color: #f3f4f6; /* light text */
+  }
+  section {
+    background: #1f2937; /* darker panel */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  }
+  section h2 {
+    border-bottom: 1px solid #374151;
+  }
+  nav a {
+    color: #60a5fa;
+  }
+  input[type="text"] {
+    background: #111827;
+    border: 1px solid #374151;
+    color: #f3f4f6;
+  }
+  pre {
+    background: #111827;
+    border: 1px solid #374151;
+    color: #e5e7eb;
+  }
+  button {
+    background: #3b82f6;
+  }
+  button:hover {
+    background: #2563eb;
+  }
+
+  .diff-add {
+    background: #144620;
+    color: #85e89d;
+  }
+  .diff-remove {
+    background: #86181d;
+    color: #fdaeb7;
+  }
+  .diff-hunk {
+    background: #1b1f23;
+    color: #79b8ff;
+  }
+  .diff-meta {
+    color: #9ca3af;
+  }
+  .commit-small {
+    color: white;
+  }
+}
+
+/* 
+*
+* Animations 
+*
+* */
+
+@keyframes spin {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

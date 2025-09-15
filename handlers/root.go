@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"embed"
 	"fmt"
 	"log"
 	"net/http"
@@ -13,40 +14,37 @@ import (
 	"html/template"
 )
 
-func Root(w http.ResponseWriter, r *http.Request) {
-	repo := env.GW_REPO()
-	if repo == "" {
-		fmt.Fprintf(w, "GW_REPO environment variable is empty.")
-		return
-	}
+func Root(templateFS embed.FS) http.HandlerFunc {
 
-	// Check if the GW_REPO exists
-	if err := utils.FolderExists(repo); err != nil {
-		log.Println(err)
-		fmt.Fprintf(w, "%s", fmt.Sprintf("GW_REPO: %v. error: %v", repo, err))
-		return
-	}
+	tmpl := template.Must(template.ParseFS(templateFS, "templates/*.html"))
 
-	// Check if the GW_REPO is a valid Git repo
-	if err := git.IsGitRepo(repo); err != nil {
-		log.Println(err)
-		fmt.Fprintf(w, "%s", fmt.Sprintf("GW_REPO: %v. error: %v", repo, err))
-		return
-	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		repo := env.GW_REPO()
+		if repo == "" {
+			fmt.Fprintf(w, "GW_REPO environment variable is empty.")
+			return
+		}
 
-	// Parse template
-	path, err := ctemplates.Path("root.html")
-	if err != nil {
-		log.Println(err)
-		fmt.Fprintf(w, "error getting template path %s", err)
-	}
-	tmpl := template.Must(template.ParseFiles(path))
+		// Check if the GW_REPO exists
+		if err := utils.FolderExists(repo); err != nil {
+			log.Println(err)
+			fmt.Fprintf(w, "%s", fmt.Sprintf("GW_REPO: %v. error: %v", repo, err))
+			return
+		}
 
-	tmplData, err := ctemplates.GetRootData()
-	if err != nil {
-		log.Println(err)
-		fmt.Fprintf(w, "%s", fmt.Sprintf("Error getting template data. error: %v", err))
-		return
+		// Check if the GW_REPO is a valid Git repo
+		if err := git.IsGitRepo(repo); err != nil {
+			log.Println(err)
+			fmt.Fprintf(w, "%s", fmt.Sprintf("GW_REPO: %v. error: %v", repo, err))
+			return
+		}
+
+		tmplData, err := ctemplates.GetRootData()
+		if err != nil {
+			log.Println(err)
+			fmt.Fprintf(w, "%s", fmt.Sprintf("Error getting template data. error: %v", err))
+			return
+		}
+		tmpl.Execute(w, tmplData)
 	}
-	tmpl.Execute(w, tmplData)
 }
