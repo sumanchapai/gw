@@ -18,6 +18,7 @@ func main() {
 
 	http.HandleFunc("/", handlers.Root)
 	http.HandleFunc("/git-command", handlers.GitCommand)
+	http.HandleFunc("/git-action", handlers.GitAction)
 
 	// Start server
 	hostPort := fmt.Sprintf("%v:%v", env.Host(), env.Port())

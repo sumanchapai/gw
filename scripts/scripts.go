@@ -1,4 +1,4 @@
-package ctemplates
+package scripts
 
 import (
 	"path/filepath"
@@ -8,7 +8,7 @@ import (
 	"github.com/sumanchapai/gw/utils"
 )
 
-func templateDirPath() (string, error) {
+func scriptsDirPath() (string, error) {
 	// Get the directory of this source file
 	_, filename, _, ok := runtime.Caller(0)
 	if !ok {
@@ -17,9 +17,9 @@ func templateDirPath() (string, error) {
 	return filepath.Dir(filename), nil
 }
 
-// Returns the absolute path of the template with the given name
+// Returns the absolute path of the script with the given name
 func Path(name string) (string, error) {
-	dir, err := templateDirPath()
+	dir, err := scriptsDirPath()
 	if err != nil {
 		return "", err
 	}

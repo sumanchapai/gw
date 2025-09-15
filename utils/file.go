@@ -21,3 +21,19 @@ func FolderExists(name string) error {
 	}
 	return nil
 }
+
+// Returns nil if the file exists, err otherwise
+func FileExists(name string) error {
+	info, err := os.Stat(name)
+	if os.IsNotExist(err) {
+		return cerrors.ErrPathDoesntExist
+	}
+	if err != nil {
+		return err
+	}
+
+	if info.IsDir() {
+		return cerrors.ErrPathNotAFile
+	}
+	return nil
+}
