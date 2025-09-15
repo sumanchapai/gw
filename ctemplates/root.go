@@ -8,6 +8,7 @@ import (
 )
 
 type RootData struct {
+	Title         string
 	CurrentBranch string
 	OtherBranches []string
 	BackLink      string
@@ -35,6 +36,7 @@ func GetRootData() (*RootData, error) {
 		}
 	}
 	return &RootData{
+		Title:         env.Title(),
 		CurrentBranch: currentBranch,
 		OtherBranches: otherBranches,
 		BackLink:      env.BACK_LINK(),

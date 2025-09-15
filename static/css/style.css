@@ -158,6 +158,7 @@ pre {
 
 .outer-wrapper {
   position: relative; /* important for absolute positioning */
+  z-index: 1;
 }
 
 .output-spinner {
@@ -260,12 +261,17 @@ pre {
   .commit-small {
     color: white;
   }
+
+  .commit-hash {
+    color: #58a6ff; /* nice blue for dark mode */
+  }
 }
 
 /* 
 *
 * Modal CSS */
 .modal {
+  z-index: 1000;
   position: fixed;
   top: 0;
   left: 0;
