@@ -17,11 +17,11 @@ document
       const data = await resp.json();
       resultBox.textContent = data.output || data.error || "(no output)";
       // Refresh diff
-      loadDiff();
+      loadDiffAndLog();
     } catch (err) {
       resultBox.textContent = "Error: " + err.message;
       // Refresh diff
-      loadDiff();
+      loadDiffAndLog();
     }
   });
 
@@ -41,7 +41,7 @@ document
 
       if (data.success) {
         alert(`Switched to branch: ${branch}`);
-        loadDiff();
+        loadDiffAndLog();
       } else {
         alert("Error switching branch:\n" + (data.error || data.output));
         e.target.value = "{{.CurrentBranch}}";
@@ -55,24 +55,67 @@ document
   });
 
 // Load git diff on page load
-async function loadDiff() {
+async function loadDiffAndLog() {
   const noDiff = "(no diff)";
   const diffBox = document.getElementById("diff-result");
+  const logBox = document.getElementById("log-result");
+  const branchesBox = document.getElementById("branch-result");
+
+  // Initial loading indicators
   if (diffBox.textContent === noDiff) {
     diffBox.textContent = "Loading...";
   }
-  try {
-    const resp = await fetch("/git-command", {
+  logBox.textContent = "Loading...";
+  branchesBox.textContent = "Loading...";
+
+  // Define all requests
+  const requests = [
+    fetch("/git-command", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        args: ["log", "--oneline", "--graph", "--decorate", "--all"],
+      }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        logBox.innerText = data.output || data.error || noDiff;
+      })
+      .catch((err) => {
+        logBox.textContent = "Error: " + err.message;
+      }),
+
+    fetch("/git-command", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ args: ["diff"] }),
-    });
-    const data = await resp.json();
-    const raw = data.output || data.error || noDiff;
-    diffBox.innerHTML = highlightDiff(raw);
-  } catch (err) {
-    diffBox.textContent = "Error: " + err.message;
-  }
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        diffBox.innerHTML = highlightDiff(data.output || data.error || noDiff);
+      })
+      .catch((err) => {
+        diffBox.textContent = "Error: " + err.message;
+      }),
+
+    fetch("/git-command", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ args: ["branch", "-vv", "--all"] }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        branchesBox.innerHTML = highlightDiff(
+          data.output || data.error || noDiff,
+        );
+      })
+      .catch((err) => {
+        branchesBox.textContent = "Error: " + err.message;
+      }),
+  ];
+
+  // Run all in parallel
+  await Promise.all(requests);
 }
 
 function escapeHtml(str) {
@@ -113,7 +156,7 @@ async function runGitAction(payload) {
       spinner.style.display = "none"; // hide spinner when finished
       resolve({ success: true });
       try {
-        loadDiff();
+        loadDiffAndLog();
       } catch (e) {}
     };
   });
@@ -177,7 +220,8 @@ btnCommitPR.addEventListener("click", async () => {
   });
 });
 
-loadDiff();
+loadDiffAndLog();
+
 function highlightDiff(diffText) {
   return diffText
     .split("\n")
