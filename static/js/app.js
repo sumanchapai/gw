@@ -79,7 +79,7 @@ async function loadDiffAndLog() {
     })
       .then((r) => r.json())
       .then((data) => {
-        logBox.innerText = data.output || data.error || noDiff;
+        logBox.innerHTML = linkifyHashes(data.output || data.error || noDiff);
       })
       .catch((err) => {
         logBox.textContent = "Error: " + err.message;
@@ -105,7 +105,7 @@ async function loadDiffAndLog() {
     })
       .then((r) => r.json())
       .then((data) => {
-        branchesBox.innerHTML = highlightDiff(
+        branchesBox.innerHTML = linkifyHashes(
           data.output || data.error || noDiff,
         );
       })
@@ -245,3 +245,44 @@ function highlightDiff(diffText) {
     })
     .join("");
 }
+
+function linkifyHashes(text) {
+  const hashRegex = /\b[0-9a-f]{7,}\b/g;
+  return escapeHtml(text).replace(hashRegex, (hash) => {
+    return `<a href="#" class="commit-hash" data-hash="${hash}">${hash}</a>`;
+  });
+}
+
+const modal = document.getElementById("modal");
+const modalBody = document.getElementById("modal-body");
+const modalClose = document.getElementById("modal-close");
+
+modalClose.onclick = () => modal.classList.add("hidden");
+window.onclick = (e) => {
+  if (e.target === modal) modal.classList.add("hidden");
+};
+
+document.body.addEventListener("click", async (e) => {
+  const link = e.target.closest(".commit-hash");
+  if (!link) return;
+
+  e.preventDefault();
+  const hash = link.dataset.hash;
+
+  modal.classList.remove("hidden");
+  modalBody.textContent = "Loading...";
+
+  try {
+    const resp = await fetch("/git-command", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ args: ["show", "--stat", "--patch", hash] }),
+    });
+    const data = await resp.json();
+    const raw = data.output || data.error || "(no output)";
+
+    modalBody.innerHTML = highlightDiff(raw); // reuse your diff highlighter
+  } catch (err) {
+    modalBody.textContent = "Error: " + err.message;
+  }
+});

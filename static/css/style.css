@@ -264,6 +264,38 @@ pre {
 
 /* 
 *
+* Modal CSS */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.modal.hidden {
+  display: none;
+}
+.modal-content {
+  background: white;
+  padding: 1em;
+  max-height: 80vh;
+  max-width: 80vw;
+  overflow-y: auto;
+  border-radius: 6px;
+}
+
+#modal-close {
+  float: right;
+  cursor: pointer;
+  font-size: 1.2em;
+}
+
+/* 
+*
 * Animations 
 *
 * */
