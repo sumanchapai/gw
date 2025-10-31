@@ -7,23 +7,21 @@ import (
 	"os/exec"
 
 	"github.com/sumanchapai/gw/cerrors"
-	"github.com/sumanchapai/gw/env"
 	"github.com/sumanchapai/gw/git"
 )
 
 // CommitAndPush stages all changes, commits with the provided message,
 // then pushes to remote. If upstream is not set, defaults to origin/<branch>.
-func CommitAndPush(commitMsg string, stdout, stderr io.Writer) error {
-	repo := env.GW_REPO()
-
+func CommitAndPush(repo string, commitMsg string, stdout, stderr io.Writer) error {
 	// Step 1: Commit
-	if err := CommitAll(commitMsg, stdout, stderr); err != nil {
+	if err := CommitAll(repo, commitMsg, stdout, stderr); err != nil {
 		return err
 	}
 
 	// Step 2: Try push
 	fmt.Fprintln(stdout, "git push")
 	pushCmd := exec.Command("git", "push")
+	pushCmd.Dir = repo
 	pushCmd.Stdout = stdout
 	pushCmd.Stderr = stderr
 	if err := pushCmd.Run(); err == nil {

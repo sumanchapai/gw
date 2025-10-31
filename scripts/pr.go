@@ -6,7 +6,6 @@ import (
 	"log"
 
 	"github.com/sumanchapai/gw/cerrors"
-	"github.com/sumanchapai/gw/env"
 	"github.com/sumanchapai/gw/git"
 )
 
@@ -16,8 +15,7 @@ import (
 // If the head and base are the same, aborts asking to create PR
 // from a different branch. If a PR already exists on the base branch,
 // aborts creating PR (only pushes).
-func CreatePR(commitMsg string, stdout, stderr io.Writer) error {
-	repo := env.GW_REPO()
+func CreatePR(repo string, commitMsg string, stdout, stderr io.Writer) error {
 	currentBranch, err := git.CurrentBranch(repo)
 	if err != nil {
 		log.Println("err getting current branch", err)
@@ -31,7 +29,7 @@ func CreatePR(commitMsg string, stdout, stderr io.Writer) error {
 		fmt.Fprintf(stderr, "%s", cerrors.ErrCantCreatePRFromDefaultBranch.Error())
 		return cerrors.ErrCantCreatePRFromDefaultBranch
 	}
-	err = CommitAndPush(commitMsg, stdout, stderr)
+	err = CommitAndPush(repo, commitMsg, stdout, stderr)
 	if err != nil {
 		return err
 	}

@@ -18,4 +18,3 @@ Can be defined in the `.env` file.
 1. Create `.env` file in the root of this folder, mentioning the absolute path to this folder as value to the variable `GW_REPO`.
 1. Optionally, set `HOST` and `PORT` environment variables as necessary.
 1. Run `gw`.
-1. Note: A bug exists currently where in if you run `gw` from a different location, some git actions will assume that location to be the location to git repo ignoring `GW_REPO` environment variable.

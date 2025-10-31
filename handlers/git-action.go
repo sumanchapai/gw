@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
+	"github.com/sumanchapai/gw/env"
 	"github.com/sumanchapai/gw/scripts"
 )
 
@@ -51,14 +52,14 @@ func GitAction(w http.ResponseWriter, r *http.Request) {
 	// Get the appropriate script name
 	switch req.Action {
 	case "commit":
-		err := scripts.CommitAll(req.CommitMsg, &stdout, &stderr)
+		err := scripts.CommitAll(env.GW_REPO(), req.CommitMsg, &stdout, &stderr)
 		if err != nil {
 			log.Println("Error running CommitAll", "err:", err)
 			conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
 			return
 		}
 	case "commit-push":
-		err := scripts.CommitAndPush(req.CommitMsg, &stdout, &stderr)
+		err := scripts.CommitAndPush(env.GW_REPO(), req.CommitMsg, &stdout, &stderr)
 		if err != nil {
 			log.Println("Error running CommitAndPush", "err:", err)
 			conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
