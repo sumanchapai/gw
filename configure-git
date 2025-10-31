@@ -1,5 +1,42 @@
 #!/bin/sh
+set -e  # Exit immediately on any error
 
-# Setup git configs and start the app
-git config --global user.email "$GIT_USER_EMAIL"
-git config --global user.name "$GIT_USER_NAME"
+echo "[startup] Beginning container initialization..."
+
+# -------------------------------------------------------------------
+# Environment variables expected:
+# -------------------------------------------------------------------
+# GIT_USER_EMAIL     → email for git commits
+# GIT_USER_NAME      → name for git commits
+# GITHUB_USERNAME    → your GitHub username
+# GITHUB_REPO        → repo name (e.g. "ui")
+# GITHUB_REPO_TOKEN  → personal access token (PAT)
+# -------------------------------------------------------------------
+
+# --- Setup git config for commits ---
+if [ -n "$GIT_USER_EMAIL" ] && [ -n "$GIT_USER_NAME" ]; then
+  git config --global user.email "$GIT_USER_EMAIL"
+  git config --global user.name "$GIT_USER_NAME"
+  echo "[startup] Git user configured: $GIT_USER_NAME <$GIT_USER_EMAIL>"
+else
+  echo "[startup] Warning: Git user info not set — commits may fail."
+fi
+
+# --- Configure remote for push if credentials are provided ---
+if [ -n "$GITHUB_USERNAME" ] && [ -n "$GITHUB_REPO" ] && [ -n "$GITHUB_REPO_TOKEN" ]; then
+  echo "[startup] GitHub credentials found. Setting remote URL..."
+  AUTH_URL="https://${GITHUB_USERNAME}:${GITHUB_REPO_TOKEN}@github.com/${GITHUB_USERNAME}/${GITHUB_REPO}.git"
+
+  # Assume repo is mounted at /data
+  if [ -d /data/.git ]; then
+    cd /data
+    git remote set-url origin "$AUTH_URL"
+    echo "[startup] Remote 'origin' updated for $GITHUB_USERNAME/$GITHUB_REPO."
+  else
+    echo "[startup] Error: /data does not contain a Git repo. Skipping remote setup."
+    exit 1
+  fi
+else
+  echo "[startup] Skipping GitHub auth setup — missing one or more of:"
+  echo "  GITHUB_USERNAME, GITHUB_REPO, or GITHUB_REPO_TOKEN"
+fi
