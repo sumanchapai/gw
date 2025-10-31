@@ -31,11 +31,13 @@ func CommitAndPush(commitMsg string, stdout, stderr io.Writer) error {
 	}
 
 	// Step 3: Handle missing upstream
-	log.Println(stderr, "Push failed, attempting to set upstream...")
+	log.Println("Push failed, attempting to set upstream...")
 
 	// Detect current branch
 	branchName, err := git.CurrentBranch(repo)
 	if err != nil {
+		log.Println("err getting current branch", err)
+		fmt.Fprintf(stderr, "error getting current branch")
 		return err
 	}
 
