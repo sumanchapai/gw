@@ -2,11 +2,12 @@ GW is a webserver that provides basic git functionalities via HTTP endpoints.
 
 The most standard way to run this project is via docker (unless you're doing project development).
 
-1. Go to the folder that you want to expose via git.
-1. Copy `.env.example` and save it as `.env`
-1. Copy docker-compose.yaml to your folder.
+1. Go to the folder that you want to run git commands from Web browser.
+1. Copy `.env.example` from this project repo and save it as `.env` into your folder.
+1. Copy `docker-compose.yaml` from this project repo and save it to your folder.
 1. Update the environment variables as needed. See below on how to set a github token.
 1. Run docker compose up.
+1. Visit [localhost:8071](http://localhost:8071)
 
 **Environment Variables**
 
