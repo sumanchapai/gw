@@ -109,10 +109,5 @@ func RemoteExists(repo string, name string) bool {
 		return false
 	}
 	remotes := strings.Split(strings.TrimSpace(res.Result), "\n")
-	for _, r := range remotes {
-		if r == name {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(remotes, name)
 }
