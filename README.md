@@ -19,8 +19,9 @@ The most standard way to run this project is via docker (unless you're doing pro
 1. Copy `.env.example` from this project repo and save it as `.env` into your folder.
 1. Copy `docker-compose.yaml` from this project repo and save it to your folder.
 1. Update the environment variables as needed. See below on how to set a github token.
-1. Run docker compose up.
-1. Visit [localhost:8071](http://localhost:8071)
+1. Run `docker compose up`. Add the `-d` flag at the end if you want run in detached mode.
+1. Set the `restart` flag in docker-compose.yaml to `always` if this is a service to automatically start on system startup.
+1. Visit [localhost:8071](http://localhost:8071) or whatever PORT, if you updated that in the environment file.
 
 **Environment Variables:**
 
