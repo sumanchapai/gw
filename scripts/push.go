@@ -47,6 +47,7 @@ func CommitAndPush(repo string, commitMsg string, stdout, stderr io.Writer) erro
 	// Retry push with upstream set
 	fmt.Fprintf(stdout, "git push --set-upstream origin %s\n", branchName)
 	upstreamCmd := exec.Command("git", "push", "--set-upstream", "origin", branchName)
+	upstreamCmd.Dir = repo
 	upstreamCmd.Stdout = stdout
 	upstreamCmd.Stderr = stderr
 	if err := upstreamCmd.Run(); err != nil {
