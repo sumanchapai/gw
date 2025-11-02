@@ -22,6 +22,20 @@ else
   echo "[startup] Warning: Git user info not set — commits may fail."
 fi
 
+# Initialize /data as a git repo if not already
+if [ -d /data ]; then
+  cd /data || exit 1
+  if [ ! -d .git ]; then
+    git init -b main
+    echo "Initialized new Git repository with main branch at /data"
+  else
+    echo "/data is already a Git repository"
+  fi
+else
+  echo "/data directory does not exist"
+fi
+
+
 # --- Configure remote for push if credentials are provided ---
 if [ -n "$GITHUB_USERNAME" ] && [ -n "$GITHUB_REPO" ] && [ -n "$GITHUB_REPO_TOKEN" ]; then
   echo "[startup] GitHub credentials found. Setting remote URL..."
