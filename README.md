@@ -11,7 +11,7 @@ apps don't have to open a terminal to backup their "database".
 
 ![Web view of `gw` app](images/image1.png)
 
-**Usage:**
+### Usage:
 
 The most standard way to run this project is via docker (unless you're doing project development).
 
@@ -23,11 +23,11 @@ The most standard way to run this project is via docker (unless you're doing pro
 1. Set the `restart` flag in docker-compose.yaml to `always` if this is a service to automatically start on system startup.
 1. Visit [localhost:8071](http://localhost:8071) or whatever PORT, if you updated that in the environment file.
 
-**Environment Variables:**
+### Environment Variables
 
 Check the sample `.env.example` file for what kinds of environment variables you can use.
 
-**Development:**
+### Development
 
 1. Clone this repo.
 1. Have go mentioned in `go.mod` or higher installed.
@@ -38,7 +38,7 @@ Check the sample `.env.example` file for what kinds of environment variables you
 1. Optionally, set `HOST` and `PORT` environment variables as necessary.
 1. Run `gw`.
 
-**Generating Github Token:**
+### Generating Github Token:
 
 1. Go to <https://github.com/settings/personal-access-tokens/>
 1. On the left sidebar, make sure "Fine-grained tokens" is selected.
