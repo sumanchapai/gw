@@ -31,6 +31,11 @@ func BACK_LINK() string {
 	return os.Getenv("BACK_LINK")
 }
 
+// BACK_LINK returns the value of the Back_Link environment variable
+func BASE_PATH() string {
+	return os.Getenv("BASE_PATH")
+}
+
 // RESTRICTED_COMMANDS returns the list of restricted git commands
 func RESTRICTED_COMMANDS() []string {
 	cmds := os.Getenv("RESTRICTED_COMMANDS")

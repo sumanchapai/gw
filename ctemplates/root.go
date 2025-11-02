@@ -12,6 +12,7 @@ type RootData struct {
 	CurrentBranch string
 	OtherBranches []string
 	BackLink      string
+	BasePath      string
 }
 
 // GetRootData builds the datatype that the root template requires.
@@ -40,5 +41,6 @@ func GetRootData() (*RootData, error) {
 		CurrentBranch: currentBranch,
 		OtherBranches: otherBranches,
 		BackLink:      env.BACK_LINK(),
+		BasePath:      env.BASE_PATH(),
 	}, nil
 }

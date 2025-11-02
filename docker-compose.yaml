@@ -11,7 +11,7 @@ services:
       - GITHUB_REPO_TOKEN=${GITHUB_REPO_TOKEN}
       - RESTRICTED_COMMANDS=${RESTRICTED_COMMANDS}
       - BACK_LINK=${BACK_LINK}
-      - GIT_PAGE_TITLE=${TITLE}
+      - GIT_PAGE_TITLE=${GIT_PAGE_TITLE}
       - HOST=${HOST}
     ports:
       - "${PORT}:8000"
