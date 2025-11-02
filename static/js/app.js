@@ -1,3 +1,14 @@
+// Example: helper to prefix all API URLs
+function apiUrl(path) {
+  // ensure there’s exactly one slash between them
+  const prefix = (typeof BASE_PATH !== "undefined" ? BASE_PATH : "").replace(
+    /\/$/,
+    "",
+  );
+  const endpoint = path.replace(/^\//, "");
+  return `${prefix}/${endpoint}`;
+}
+
 // Run arbitrary git command
 document
   .querySelector(".git-command-form")
@@ -9,7 +20,7 @@ document
     const resultBox = document.getElementById("command-result");
     resultBox.textContent = "Running...";
     try {
-      const resp = await fetch("/git-command", {
+      const resp = await fetch(apiUrl("/git-command"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ args: cmd.split(" ") }),
@@ -32,7 +43,7 @@ document
     const branch = e.target.value;
     e.target.disabled = true;
     try {
-      const resp = await fetch("/git-command", {
+      const resp = await fetch(apiUrl("/git-command"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ args: ["checkout", branch] }),
@@ -70,7 +81,7 @@ async function loadDiffAndLog() {
 
   // Define all requests
   const requests = [
-    fetch("/git-command", {
+    fetch(apiUrl("/git-command"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -85,7 +96,7 @@ async function loadDiffAndLog() {
         logBox.textContent = "Error: " + err.message;
       }),
 
-    fetch("/git-command", {
+    fetch(apiUrl("/git-command"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ args: ["diff"] }),
@@ -98,7 +109,7 @@ async function loadDiffAndLog() {
         diffBox.textContent = "Error: " + err.message;
       }),
 
-    fetch("/git-command", {
+    fetch(apiUrl("/git-command"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ args: ["branch", "-vv", "--all"] }),
@@ -273,7 +284,7 @@ document.body.addEventListener("click", async (e) => {
   modalBody.textContent = "Loading...";
 
   try {
-    const resp = await fetch("/git-command", {
+    const resp = await fetch(apiUrl("/git-command"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ args: ["show", "--stat", "--patch", hash] }),
