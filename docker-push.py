@@ -28,7 +28,9 @@ def ask_and_run_cmd(cmd: str):
 
 # --- MAIN ---
 if not version_file.exists():
-    print(version_file, "doesn't exist.")
+    print(
+        version_file, "doesn't exist. create one and specify your latest version there"
+    )
     exit(1)  # <-- FIXED: os.exit() does not exist; use exit() or sys.exit()
 
 with open(version_file) as fd:
