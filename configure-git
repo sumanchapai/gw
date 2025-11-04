@@ -22,14 +22,14 @@ else
   echo "[startup] Warning: Git user info not set — commits may fail."
 fi
 
-# Initialize /data as a git repo if not already
+# Initialize /data as a git repo if not already part of one
 if [ -d /data ]; then
   cd /data || exit 1
-  if [ ! -d .git ]; then
+  if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    echo "/data is already inside a Git repository"
+  else
     git init -b main
     echo "Initialized new Git repository with main branch at /data"
-  else
-    echo "/data is already a Git repository"
   fi
 else
   echo "/data directory does not exist"
