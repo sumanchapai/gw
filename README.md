@@ -48,3 +48,13 @@ Check the sample `.env.example` file for what kinds of environment variables you
 1. Select "Only select repository" and select the repo you want to give access to.
 1. On the bottom box, click on add permissions select "Contents"
 1. Give contents Read and Write access and save the token in the .env file in the `TOKEN` variable.
+
+### Running purely locally
+
+By default, your server will listen on all interfaces meaning that others connected
+to the same network (Wifi) as you will be able to access your server by your IP:PORT
+web address. If you want to run only in localhost, change your PORT by prepending local IP as follows:
+
+```.env
+PORT=127.0.0.1:8063
+```
