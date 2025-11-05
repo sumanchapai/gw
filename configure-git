@@ -34,23 +34,3 @@ if [ -d /data ]; then
 else
   echo "/data directory does not exist"
 fi
-
-
-# --- Configure remote for push if credentials are provided ---
-if [ -n "$GITHUB_USERNAME" ] && [ -n "$GITHUB_REPO" ] && [ -n "$GITHUB_REPO_TOKEN" ]; then
-  echo "[startup] GitHub credentials found. Setting remote URL..."
-  AUTH_URL="https://${GITHUB_USERNAME}:${GITHUB_REPO_TOKEN}@github.com/${GITHUB_USERNAME}/${GITHUB_REPO}.git"
-
-  # Assume repo is mounted at /data
-  if [ -d /data/.git ]; then
-    cd /data
-    git remote set-url origin "$AUTH_URL"
-    echo "[startup] Remote 'origin' updated for $GITHUB_USERNAME/$GITHUB_REPO."
-  else
-    echo "[startup] Error: /data does not contain a Git repo. Skipping remote setup."
-    exit 1
-  fi
-else
-  echo "[startup] Skipping GitHub auth setup — missing one or more of:"
-  echo "  GITHUB_USERNAME, GITHUB_REPO, or GITHUB_REPO_TOKEN"
-fi

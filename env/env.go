@@ -36,6 +36,11 @@ func GITHUB_REPO() string {
 	return os.Getenv("GITHUB_REPO")
 }
 
+// GITHUB_REPO_TOKEN return the value of the GITHUB_REPO_TOKEN environment variable
+func GITHUB_REPO_TOKEN() string {
+	return os.Getenv("GITHUB_REPO_TOKEN")
+}
+
 // BACK_LINK returns the value of the Back_Link environment variable
 func BACK_LINK() string {
 	return os.Getenv("BACK_LINK")
