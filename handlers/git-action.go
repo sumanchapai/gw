@@ -58,8 +58,8 @@ func GitAction(w http.ResponseWriter, r *http.Request) {
 			conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
 			return
 		}
-	case "commit-push":
-		err := scripts.CommitAndPush(env.GW_REPO(), req.CommitMsg, &stdout, &stderr)
+	case "push":
+		err := scripts.Push(env.GW_REPO(), req.CommitMsg, &stdout, &stderr)
 		if err != nil {
 			log.Println("Error running CommitAndPush", "err:", err)
 			conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))

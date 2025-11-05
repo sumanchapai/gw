@@ -157,7 +157,7 @@ function escapeHtml(str) {
 }
 
 const btnCommit = document.getElementById("btn-commit");
-const btnCommitPush = document.getElementById("btn-commit-push");
+const btnCommitPush = document.getElementById("btn-push");
 const btnCommitPR = document.getElementById("btn-commit-pr");
 const outputBox = document.getElementById("commit-action-output");
 const branchSelect = document.getElementById("branch-select");
@@ -219,40 +219,14 @@ btnCommit.addEventListener("click", async () => {
 });
 
 btnCommitPush.addEventListener("click", async () => {
-  const commitMsg = prompt("Commit message:");
-  if (!commitMsg) {
-    alert("Aborted: commit message required.");
-    return;
-  }
   await runGitAction({
-    action: "commit-push",
-    commitmsg: commitMsg,
+    action: "push",
+    commitmsg: "",
   });
 });
 
 btnCommitPR.addEventListener("click", async () => {
-  const commitMsg = prompt("Commit message:");
-  if (!commitMsg) {
-    alert("Aborted: commit message required.");
-    return;
-  }
-
-  // Prompt for PR title/body (default to commit message)
-  const prTitle = prompt("PR title:", commitMsg) || commitMsg;
-  const prBody = prompt("PR body (optional):", "") || "";
-
-  // Optionally choose base (default 'main')
-  const prBase = prompt("PR base branch (default: main):", "main") || "main";
-
-  const branch = branchSelect?.value || null;
-  await runGitAction({
-    action: "commit-pr",
-    branch,
-    message: commitMsg,
-    pr_base: prBase,
-    pr_title: prTitle,
-    pr_body: prBody,
-  });
+  alert("not implemented yet");
 });
 
 loadDiffAndLog();

@@ -7,18 +7,14 @@ import (
 	"os/exec"
 
 	"github.com/sumanchapai/gw/cerrors"
+	"github.com/sumanchapai/gw/env"
 	"github.com/sumanchapai/gw/git"
 )
 
-// CommitAndPush stages all changes, commits with the provided message,
+// Push stages all changes, commits with the provided message,
 // then pushes to remote. If upstream is not set, defaults to origin/<branch>.
-func CommitAndPush(repo string, commitMsg string, stdout, stderr io.Writer) error {
-	// Step 1: Commit
-	if err := CommitAll(repo, commitMsg, stdout, stderr); err != nil {
-		return err
-	}
-
-	// Step 2: Try push
+func Push(repo string, commitMsg string, stdout, stderr io.Writer) error {
+	// Step 1: Try push
 	fmt.Fprintln(stdout, "git push")
 	pushCmd := exec.Command("git", "push")
 	pushCmd.Dir = repo
@@ -28,7 +24,7 @@ func CommitAndPush(repo string, commitMsg string, stdout, stderr io.Writer) erro
 		return nil // success on first push
 	}
 
-	// Step 3: Handle missing upstream
+	// Step 2: Handle missing upstream
 	log.Println("Push failed, attempting to set upstream...")
 
 	// Detect current branch
@@ -41,7 +37,22 @@ func CommitAndPush(repo string, commitMsg string, stdout, stderr io.Writer) erro
 
 	// Detect if "origin" exists
 	if !git.RemoteExists(repo, "origin") {
-		return cerrors.ErrNoOriginRemoteExists
+		// Try to set origin if not exists
+		fmt.Fprintln(stdout, "no origin found. trying to set origin")
+		githubUsername := env.GITHUB_USERNAME()
+		if githubUsername == "" {
+			return cerrors.ErrNoGithubUsernameSet
+		}
+		githubRepo := env.GITHUB_REPO()
+		if githubRepo == "" {
+			return cerrors.ErrNoGithubRepoSet
+		}
+		remoteFullName := fmt.Sprintf("git@github.com:%v/%v.git", githubUsername, githubRepo)
+		fmt.Fprintf(stdout, "git remote add origin %v\n", remoteFullName)
+		setOriginCmd := exec.Command("git", "remote", "add", "origin", remoteFullName)
+		setOriginCmd.Dir = repo
+		setOriginCmd.Stdout = stdout
+		setOriginCmd.Stderr = stderr
 	}
 
 	// Retry push with upstream set

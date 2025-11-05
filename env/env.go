@@ -26,6 +26,16 @@ func GW_REPO() string {
 	return os.Getenv("GW_REPO")
 }
 
+// GITHUB_USERNAME return the value of the GITHUB_USERNAME environment variable
+func GITHUB_USERNAME() string {
+	return os.Getenv("GITHUB_USERNAME")
+}
+
+// GITHUB_REPO return the value of the GITHUB_REPO environment variable
+func GITHUB_REPO() string {
+	return os.Getenv("GITHUB_REPO")
+}
+
 // BACK_LINK returns the value of the Back_Link environment variable
 func BACK_LINK() string {
 	return os.Getenv("BACK_LINK")

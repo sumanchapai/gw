@@ -29,7 +29,7 @@ func CreatePR(repo string, commitMsg string, stdout, stderr io.Writer) error {
 		fmt.Fprintf(stderr, "%s", cerrors.ErrCantCreatePRFromDefaultBranch.Error())
 		return cerrors.ErrCantCreatePRFromDefaultBranch
 	}
-	err = CommitAndPush(repo, commitMsg, stdout, stderr)
+	err = Push(repo, commitMsg, stdout, stderr)
 	if err != nil {
 		return err
 	}
