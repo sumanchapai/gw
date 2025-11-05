@@ -9,6 +9,20 @@ function apiUrl(path) {
   return `${prefix}/${endpoint}`;
 }
 
+function parseArgs(input) {
+  const matches = input.match(/(?:[^\s"']+|"(?:[^"]*)"|'(?:[^']*)')+/g) || [];
+  return matches.map((arg) => {
+    // Remove surrounding quotes if present
+    if (
+      (arg.startsWith('"') && arg.endsWith('"')) ||
+      (arg.startsWith("'") && arg.endsWith("'"))
+    ) {
+      return arg.slice(1, -1);
+    }
+    return arg;
+  });
+}
+
 // Run arbitrary git command
 document
   .querySelector(".git-command-form")
@@ -23,7 +37,7 @@ document
       const resp = await fetch(apiUrl("/git-command"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ args: cmd.split(" ") }),
+        body: JSON.stringify({ args: parseArgs(cmd) }),
       });
       const data = await resp.json();
       resultBox.textContent = data.output || data.error || "(no output)";
