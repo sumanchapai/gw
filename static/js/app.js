@@ -9,6 +9,15 @@ function apiUrl(path) {
   return `${prefix}/${endpoint}`;
 }
 
+function wsApiUrl(path) {
+  const prefix =
+    typeof BASE_PATH !== "undefined"
+      ? BASE_PATH.replace(/\/$/, "") // remove trailing slash
+      : "";
+  const endpoint = path.replace(/^\//, ""); // remove leading slash
+  return `ws://${window.location.host}${prefix ? prefix + "/" : "/"}${endpoint}`;
+}
+
 function parseArgs(input) {
   const matches = input.match(/(?:[^\s"']+|"(?:[^"]*)"|'(?:[^']*)')+/g) || [];
   return matches.map((arg) => {
@@ -160,7 +169,8 @@ async function runGitAction(payload) {
   outputBox.textContent = ""; // clear old logs
 
   return new Promise((resolve, reject) => {
-    const ws = new WebSocket(`ws://${window.location.host}/git-action`);
+    const wsUrl = wsApiUrl("/git-action");
+    const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
       ws.send(JSON.stringify(payload));
