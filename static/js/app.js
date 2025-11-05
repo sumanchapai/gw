@@ -90,7 +90,7 @@ document
 
 // Load git diff on page load
 async function loadDiffAndLog() {
-  const noDiff = "(no diff)";
+  const noDiff = "(no data)";
   const diffBox = document.getElementById("diff-result");
   const logBox = document.getElementById("log-result");
   const branchesBox = document.getElementById("branch-result");
