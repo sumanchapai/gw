@@ -3,9 +3,9 @@ from pathlib import Path
 
 # --- SETTINGS ---
 username = "sumanchapai"
-folder_name = Path.cwd().name
-local_docker_image_name = folder_name
-remote_docker_image_name = f"{username}/{folder_name}"
+image_name = "gw"
+local_docker_image_name = image_name
+remote_docker_image_name = f"{username}/{image_name}"
 
 version_file = Path(".dockerversion")
 
@@ -47,13 +47,10 @@ if not new_version:
 with open(version_file, "w") as fd:
     fd.write(new_version)
 
-# Docker build and push commands
-ask_and_run_cmd(f"docker build -t {local_docker_image_name}:{new_version} .")
 ask_and_run_cmd(
-    f"docker tag {local_docker_image_name}:{new_version} {remote_docker_image_name}:{new_version}"
+    f"docker buildx build "
+    f"--platform linux/amd64,linux/arm64 "
+    f"-t {remote_docker_image_name}:{new_version} "
+    f"-t {remote_docker_image_name}:latest "
+    f"--push ."
 )
-ask_and_run_cmd(
-    f"docker tag {local_docker_image_name}:{new_version} {remote_docker_image_name}:latest"
-)
-ask_and_run_cmd(f"docker push {remote_docker_image_name}:{new_version}")
-ask_and_run_cmd(f"docker push {remote_docker_image_name}:latest")
