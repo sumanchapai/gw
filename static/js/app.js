@@ -15,7 +15,8 @@ function wsApiUrl(path) {
       ? BASE_PATH.replace(/\/$/, "") // remove trailing slash
       : "";
   const endpoint = path.replace(/^\//, ""); // remove leading slash
-  return `ws://${window.location.host}${prefix ? prefix + "/" : "/"}${endpoint}`;
+  const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
+  return `${proto}//${window.location.host}${prefix ? prefix + "/" : "/"}${endpoint}`;
 }
 
 function parseArgs(input) {
